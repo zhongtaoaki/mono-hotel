@@ -1,8 +1,10 @@
 package com.example.msasample.mono.hotel.services;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.msasample.mono.hotel.model.HotelApplicationInfo;
 import com.example.msasample.mono.hotel.model.entities.HotelReservation;
@@ -26,14 +28,28 @@ public class HotelReserveService {
 	 * @param HotelApplicationInfo
 	 * @return HotelReservation
 	 */
+	@Transactional
 	public HotelReservation reserveHotel(HotelApplicationInfo hotelApplicationInfo) {
 
-		HotelReservation example = HotelReservation.builder()//
+		if (hotelReservationRepository.count() > 5) {
+			throw new RuntimeException("満室です。");
+		}
+
+		HotelReservation hotelReservation = HotelReservation.builder()//
 				.name(hotelApplicationInfo.getName())//
 				.checkInDate(hotelApplicationInfo.getCheckInDate())//
+				.checkInDateTime(LocalDateTime.now())//
 				.checkOutDate(hotelApplicationInfo.getCheckOutDate())//
+				.checkOutDateTime(LocalDateTime.now())//
+				.roomNo("101")//
 				.build();
 
-		return hotelReservationRepository.findOne(Example.of(example)).orElseThrow();
+		return hotelReservationRepository.saveAndFlush(hotelReservation);
 	}
+
+	@Transactional
+	public void cancelHotel(Long id) {
+		hotelReservationRepository.deleteById(id);
+	}
+
 }
