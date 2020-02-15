@@ -36,4 +36,8 @@ public class HotelReserveService {
 
 		return hotelReservationRepository.findOne(Example.of(example)).orElseThrow();
 	}
+	
+	public void deleteHotel(Long hotelReservationId) {
+		hotelReservationRepository.deleteById(hotelReservationId);
+	}
 }
